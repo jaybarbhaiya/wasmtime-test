@@ -1,6 +1,6 @@
 # wasmtime-test
 
-This is a test repository to check the deallocation time of a `module` in `wasmtime`.
+This is a test repository to benchmark creation and destruction of a `module` in `wasmtime`.
 
 ## How to run
 
