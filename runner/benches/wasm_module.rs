@@ -1,8 +1,8 @@
-use std::{env::current_dir, vec};
+use std::env::current_dir;
 
 use criterion::{black_box, criterion_group, criterion_main};
-use wasmtime::{Engine, Module};
 use lazy_static::lazy_static;
+use wasmtime::{Engine, Module};
 
 lazy_static! {
     static ref WASM_BYTES: Vec<u8> = read_wasm_bytes();
@@ -44,13 +44,13 @@ fn wasm_module(c: &mut criterion::Criterion) {
     });
 
     group.bench_function("destruction", |b| {
-        b.iter_batched(|| {
-            let module = WasmBuilder::new(&WASM_BYTES).build().unwrap();
-            let modules = vec![module; 1000];
-            modules
-        }, |modules| {
-            drop(modules);
-        }, criterion::BatchSize::SmallInput);        
+        b.iter_batched(
+            || WasmBuilder::new(&WASM_BYTES).build().unwrap(),
+            |module| {
+                black_box(drop(module));
+            },
+            criterion::BatchSize::SmallInput,
+        );
     });
     group.finish();
 }

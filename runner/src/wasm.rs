@@ -1,4 +1,3 @@
-
 use wasmtime::{Engine, Module};
 
 pub struct WasmBuilder<'a> {
