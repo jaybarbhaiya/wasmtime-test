@@ -1,4 +1,4 @@
-name: Rust wasmtime benchmark (Ubuntu)
+name: Rust wasmtime benchmark (Measure loop execution duration)
 
 on:
   push:

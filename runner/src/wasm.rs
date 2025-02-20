@@ -1,14 +1,13 @@
-use std::borrow::Cow;
 
 use wasmtime::{Engine, Module};
 
 pub struct WasmBuilder<'a> {
-    wasm_bytes: Cow<'a, [u8]>,
+    wasm_bytes: &'a [u8],
 }
 
 impl<'a> WasmBuilder<'a> {
     pub fn new(wasm_bytes: &'a [u8]) -> Self {
-        let wasm_bytes = Cow::Borrowed(wasm_bytes);
+        let wasm_bytes = wasm_bytes;
         Self { wasm_bytes }
     }
 
