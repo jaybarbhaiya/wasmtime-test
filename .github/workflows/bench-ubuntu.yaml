@@ -1,0 +1,28 @@
+name: Rust wasmtime benchmark (Ubuntu)
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install minimal nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+
+      - name: Add wasm32-unknown-unknown target
+        run: rustup target add wasm32-unknown-unknown
+
+      - name: Build project and wasm
+        run: cargo build --release --target wasm32-unknown-unknown
+
+      - name: Run benchmark
+        run: cargo run --release --manifest-path runner/Cargo.toml
