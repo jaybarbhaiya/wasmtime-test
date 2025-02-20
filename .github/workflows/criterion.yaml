@@ -25,7 +25,7 @@ jobs:
         run: cargo build --release --target wasm32-unknown-unknown
 
       - name: Run benchmark
-        run: cargo bench --manifest-path .\runner\Cargo.toml --bench wasm_module
+        run: cargo bench --manifest-path ./runner/Cargo.toml --bench wasm_module
 
   bench-macos:
     runs-on: macos-latest
@@ -46,7 +46,7 @@ jobs:
         run: cargo build --release --target wasm32-unknown-unknown
 
       - name: Run benchmark
-        run: cargo bench --manifest-path .\runner\Cargo.toml --bench wasm_module
+        run: cargo bench --manifest-path ./runner/Cargo.toml --bench wasm_module
 
   bench-windows:
     runs-on: windows-latest
@@ -67,4 +67,4 @@ jobs:
         run: cargo build --release --target wasm32-unknown-unknown
 
       - name: Run benchmark
-        run: cargo bench --manifest-path .\runner\Cargo.toml --bench wasm_module
+        run: cargo bench --manifest-path ./runner/Cargo.toml --bench wasm_module
