@@ -1,55 +1,50 @@
-use std::env::current_dir;
+use std::hint::black_box;
 
-use lazy_static::lazy_static;
-use wasm::WasmBuilder;
-use wasmtime::Module;
+use wasmtime::{Engine, Module};
 
-mod wasm;
-
-lazy_static! {
-    static ref WASM_BYTES: Vec<u8> = read_wasm_bytes();
+fn create_module() -> Result<Module, wasmtime::Error> {
+    let engine = Engine::default();
+    Module::new(&engine, include_bytes!("../../test.wasm"))
 }
 
-fn read_wasm_bytes() -> Vec<u8> {
-    let wasm_path = current_dir()
-        .expect("cannot get current directory")
-        .join("target")
-        .join("wasm32-unknown-unknown")
-        .join("release")
-        .join("wasmtime_test.wasm");
-    std::fs::read(&wasm_path).unwrap()
-}
+const ITERATIONS: usize = 1000;
 
-fn bench_creation(wasm_bytes: &'static [u8], iterations: usize) -> Vec<Module> {
+fn bench_creation() {
     // warmup
-    for _ in 0..iterations {
-        let builder = WasmBuilder::new(&wasm_bytes);
-        let extension = builder.build();
-        assert!(extension.is_ok());
+    let module = create_module();
+    assert!(module.is_ok());
+    let mut modules: Vec<Module> = Vec::with_capacity(ITERATIONS);
+    for _ in 0..ITERATIONS {
+        modules.push(black_box(create_module().unwrap()));
     }
+    assert_eq!(modules.len(), ITERATIONS);
 
-    let sample = WasmBuilder::new(&wasm_bytes).build().unwrap();
-    let mut modules = vec![sample; iterations];
     // benchmark
+    let mut modules: Vec<Module> = Vec::with_capacity(ITERATIONS);
     let now = std::time::Instant::now();
-    for wasm in modules.iter_mut() {
-        *wasm = WasmBuilder::new(&wasm_bytes).build().unwrap();
+    for _ in 0..ITERATIONS {
+        modules.push(black_box(create_module().unwrap()));
     }
     let elapsed = now.elapsed();
-    let avg_duration = elapsed.as_micros() as f64 / iterations as f64;
+    assert_eq!(modules.len(), ITERATIONS);
+    let avg_duration = elapsed.as_micros() as f64 / ITERATIONS as f64;
     println!("Average creation duration: {} microseconds", avg_duration);
-
-    modules
 }
 
-fn bench_destruction(iterations: usize, extensions: Vec<Module>) {
+fn bench_destruction() {
+    let mut modules = Vec::with_capacity(1000);
+    for _ in 0..1000 {
+        let module = create_module().unwrap();
+        //modules.push(MyModule { module });
+        modules.push(module);
+    }
+    assert_eq!(modules.len(), ITERATIONS);
+
     // benchmark
     let now = std::time::Instant::now();
-    for extension in extensions {
-        drop(extension);
-    }
+    drop(black_box(modules));
     let elapsed = now.elapsed();
-    let avg_duration = elapsed.as_micros() as f64 / iterations as f64;
+    let avg_duration = elapsed.as_micros() as f64 / ITERATIONS as f64;
     println!(
         "Average destruction duration: {} microseconds",
         avg_duration
@@ -57,7 +52,6 @@ fn bench_destruction(iterations: usize, extensions: Vec<Module>) {
 }
 
 fn main() {
-    let iterations = 1000;
-    let wasm_modules = bench_creation(&WASM_BYTES, iterations);
-    bench_destruction(iterations, wasm_modules);
+    bench_creation();
+    bench_destruction();
 }
